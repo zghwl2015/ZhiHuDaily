@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:padding="10dp"
+    android:background="@color/peacockBlue">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/user_portrait"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:src = "@drawable/comment_avatar"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_alignLeft="@+id/user_portrait"
+            android:text="请登录"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:textColor="#FFF"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:src="@drawable/collect"
+            android:layout_weight="1"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:text="我的收藏"
+            android:layout_weight="2"
+            android:textColor="#FFF"/>
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:src="@drawable/download"
+            android:layout_weight="1"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:text="离线下载"
+            android:layout_weight="2"
+            android:textColor="#FFF"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
