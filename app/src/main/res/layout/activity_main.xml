@@ -41,22 +41,22 @@
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_height="wrap_content" />-->
 
-        <fragment
-            android:id="@+id/recyclerview_fragment"
-            android:name="com.example.zhihudaily.RecyclerViewFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <!--<FrameLayout-->
-            <!--android:id="@+id/fl_layout"-->
+        <!--<fragment-->
+            <!--android:id="@+id/recyclerview_fragment"-->
+            <!--android:name="com.example.zhihudaily.RecyclerViewFragment"-->
             <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
+            <!--android:layout_height="wrap_content"/>-->
 
-            <!--&lt;!&ndash;<Button&ndash;&gt;-->
-                <!--&lt;!&ndash;android:id="@+id/button"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_height="wrap_content" />&ndash;&gt;-->
-        <!--</FrameLayout>-->
+        <FrameLayout
+            android:id="@+id/fl_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--<Button-->
+                <!--android:id="@+id/button"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content" />-->
+        </FrameLayout>
 
     </LinearLayout>
 
@@ -73,7 +73,8 @@
         android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity = "start"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#F5F5F5">
 
         <include layout="@layout/zhihu_header"/>
 
@@ -105,7 +106,7 @@
         <ListView
             android:id="@+id/menu_listview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="400dp">
         </ListView>
 
 

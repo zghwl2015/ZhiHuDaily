@@ -19,9 +19,10 @@ public class Story {
 
     public int id;
 
-    public Story(String mTitle, List<String> mImages){
+    public Story(String mTitle, List<String> mImages, int mId){
         title = mTitle;
         images = mImages;
+        id = mId;
     }
 
 }

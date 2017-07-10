@@ -8,7 +8,7 @@ import java.util.List;
  * Created by hwl on 2017/3/13.
  */
 
-public class NewsDetail {
+public class NewsContent {
 
     public String body;
 

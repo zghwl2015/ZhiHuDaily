@@ -8,21 +8,39 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.zhihudaily.adapter.GlideImageLoader;
 import com.example.zhihudaily.adapter.NewsListAdapter;
+import com.example.zhihudaily.json.LatestNews;
+import com.example.zhihudaily.json.NewsContent;
 import com.example.zhihudaily.json.Story;
+import com.example.zhihudaily.json.ThemeNewsContent;
+import com.example.zhihudaily.json.ThemeNewsStory;
+import com.example.zhihudaily.json.TopStory;
+import com.example.zhihudaily.util.HttpUtil;
+import com.example.zhihudaily.util.Urls;
+import com.google.gson.Gson;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by hwl on 2017/7/3.
@@ -39,11 +57,20 @@ public class RecyclerViewFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private Banner mBanner;
 
-    private List<Integer> bannerImages = new ArrayList<>();;//banner轮播图片
+//    private TextView textView;
+
+    private List<String> bannerImages = new ArrayList<>();;//banner轮播图片
     private List<String> imageTitles = new ArrayList<>();;//轮播图片标题
     private List<Story> storyList = new ArrayList<>();//recyclerview新闻子项内容
 
+    public void setMenuIdMap(Map<String, Integer> menuIdMap) {
+        this.menuIdMap = menuIdMap;
+    }
 
+    private Map<String, Integer> menuIdMap = new HashMap<>();
+
+    private SwitchFragmentListener mSwitchFragmentListener;
+    private WebViewFragment mWebViewFragment;
 
 
 
@@ -52,6 +79,7 @@ public class RecyclerViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 //        return super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.recycleview_fragment, container, false);
+//        textView = (TextView) view.findViewById(R.id.text_view);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 //        View header = LayoutInflater.from(getActivity()).inflate(R.layout.header, null);//这个方法为何？
 //        mBanner =(Banner) header.findViewById(R.id.banner);
@@ -63,12 +91,81 @@ public class RecyclerViewFragment extends Fragment {
         setmHeaderViewAndTitleView(mRecyclerView);
 //        myAdapter.setmHeaderView(null);
 
+
 //        View titleView = LayoutInflater.from(getActivity()).
 //                inflate(R.layout.recyclerview_title, null);
 //        myAdapter.setmTitleView(titleView);
         mRecyclerView.setAdapter(myAdapter);
         //启动mBanner
-        initDataAndImages();
+//        initDataAndImages();
+//        requestFromServer();
+
+//        requestLatestNewsFromServer(Urls.LATEST_NEWS);
+//        requestThemeNewsFromServer(Urls.THEME_NEWS + 11);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        return view;
+    }
+
+    /*
+    完成一些与父活动相关的初始化操作
+     */
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        menuIdMap = ((MainActivity)getActivity()).getMenuIdMap();
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                showProgressDialog();
+                String toolbarTitle = ((Toolbar)getActivity().findViewById(R.id.toolbar)).getTitle().toString();
+                if ( toolbarTitle == "首页"){
+                    requestLatestNewsFromServer(Urls.LATEST_NEWS);
+
+                }else {
+                    int themeId = menuIdMap.get(toolbarTitle);
+                    requestThemeNewsFromServer(Urls.THEME_NEWS + themeId);
+                }
+                swipeRefreshLayout.setRefreshing(false);
+                closeProgressDialog();
+
+
+            }
+        });
+        menuIdMap = ((MainActivity) getActivity()).getMenuIdMap();
+        myAdapter.setRecyclerViewOnClickListener(new NewsListAdapter.RecyclerViewOnClickListener() {
+            @Override
+            public void onClick(int id) {
+                requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id);
+//                Intent intent = new Intent(getActivity(), TestActivity.class);
+//                intent.putExtra("themeId", id);
+//                getActivity().startActivity(intent);
+            }
+
+            @Override
+            public int getThemeId(String title) {
+                if (menuIdMap.get(title) != null){
+                    return menuIdMap.get(title);
+                }
+                return -1;
+
+            }
+        });
+    }
+
+    public void setmHeaderViewAndTitleView(RecyclerView view){
+        View header = LayoutInflater.from(getActivity()).inflate(R.layout.header,view, false);//这个方法为何？
+        mBanner =(Banner) header.findViewById(R.id.banner);
+        myAdapter.setmHeaderView(mBanner);
+
+        View titleView = LayoutInflater.from(getActivity()).
+                inflate(R.layout.recyclerview_title, view, false);
+        myAdapter.setmTitleView(titleView);
+
+    }
+
+    public void startBanner(){
         mBanner.setImages(bannerImages)
                 .setBannerStyle(BannerConfig.CIRCLE_INDICATOR_TITLE)
                 .setImageLoader(new GlideImageLoader(){
@@ -89,51 +186,33 @@ public class RecyclerViewFragment extends Fragment {
                     }
                 });
         mBanner.start();
-
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-            }
-        });
-
-        return view;
     }
 
-    public void setmHeaderViewAndTitleView(RecyclerView view){
-        View header = LayoutInflater.from(getActivity()).inflate(R.layout.header,view, false);//这个方法为何？
-        mBanner =(Banner) header.findViewById(R.id.banner);
-        myAdapter.setmHeaderView(mBanner);
-
-        View titleView = LayoutInflater.from(getActivity()).
-                inflate(R.layout.recyclerview_title, view, false);
-        myAdapter.setmTitleView(titleView);
-
-    }
-
+    //测试用的初始化数据方法，主要测试recyclerView是否正常显示
     private void initDataAndImages(){
-//        bannerImages.add("http://img.zcool.cn/community/01b72057a7e0790000018c1bf4fce0.png");
+        bannerImages.add("https://pic3.zhimg.com/v2-5853b2c39fd0316b4d2db748e74c4f6e.jpg");
 //        bannerImages.add("https://pic4.zhimg.com//v2-cf58ba2a7d9c5e13dbd79d2546900c43.jpg");
 //        bannerImages.add("http://img.zcool.cn/community/01fca557a7f5f90000012e7e9feea8.jpg");
-        bannerImages.add(R.drawable.a);
-        bannerImages.add(R.drawable.b);
-        bannerImages.add(R.drawable.c);
+//        bannerImages.add(R.drawable.a);
+//        bannerImages.add(R.drawable.b);
+//        bannerImages.add(R.drawable.c);
 
         imageTitles.add("贝聿铭建筑1");
-        imageTitles.add("贝聿铭建筑2");
-        imageTitles.add("贝聿铭建筑3");
+//        imageTitles.add("贝聿铭建筑2");
+//        imageTitles.add("贝聿铭建筑3");
+
+
+//        requestFromServer();
 
         ArrayList<String> list = new ArrayList<>();
         list.add("https://pic4.zhimg.com//v2-cf58ba2a7d9c5e13dbd79d2546900c43.jpg");
-        Story story = new Story("中国古代家具发展到今天有两个高峰，一个两宋一个明末（多图）", list);
-        storyList.add(story);
-        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
-        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
-        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
-        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
-        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
+//        Story story = new Story("中国古代家具发展到今天有两个高峰，一个两宋一个明末（多图）", list);
+//        storyList.add(story);
+//        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
+//        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
+//        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
+//        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
+//        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<String>(list)));
 
 //        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<Integer>(list)));
 //        storyList.add(new Story("长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？", new ArrayList<Integer>(list)));
@@ -149,33 +228,206 @@ public class RecyclerViewFragment extends Fragment {
 
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
+    public void parseJson(String res){
+        Log.d("LatestNews","res: " + res);
+        LatestNews latestNews = new Gson().fromJson(res, LatestNews.class);
+        Log.d("LatestNews","story title is : " + latestNews.stories.get(0).title);
+        Log.d("LatestNews","story image url is : " + latestNews.stories.get(0).images.get(0));
+        for (Story story : latestNews.stories)
+            storyList.add(story);
+        for (TopStory topStory : latestNews.topStories){
+            bannerImages.add(topStory.image);
+            imageTitles.add(topStory.title);
+        }
+        startBanner();
+        myAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
 
+    }
 
     /*
-    请求最新消息
+    请求最新消息，先查看本地数据库有无缓存，有则直接从本地获取；无则向服务器请求
      */
-    private void requestLatestNews(){
+    public void requestLatestNews(){
 
     }
 
+    /*
+    请求主题日报，先查看本地数据库有无缓存，有则直接从本地获取；无则向服务器请求
+     */
+    public void requestThemeNews(){
+
+    }
+
+    /*
+    向远程服务端请求内容
+     */
+    public void requestLatestNewsFromServer(String address){
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final LatestNews latestNews =  new Gson().fromJson(response.body().string(), LatestNews.class);;
+//                final String string = response.body().toString();
+
+//                final ThemeNewsContent themeNewsContent = Utility.handleThemeNewsResponse(response.body().toString());
+//                final boolean or = (response.isSuccessful());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (latestNews != null)
+                            handleInfo(latestNews);
+                        else
+                            Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+//                        parseJson(string);
+                    }
+                });
+            }
+        });
+    }
 
     /*
     请求具体消息内容
      */
-    private void requestNewsContent(){
+    public void requestThemeNewsFromServer(String address){
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final ThemeNewsContent themeNewsContent =  new Gson().fromJson(response.body().string(),
+                        ThemeNewsContent.class);
+                final boolean or = (response.isSuccessful());
+//                final String string = response.body().string();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (themeNewsContent != null)
+                            handleInfo(themeNewsContent);
+                        else
+                            Toast.makeText(getActivity(), "请求失败=_=" + or, Toast.LENGTH_SHORT).show();
+//                        parseJson(string);
+//                        textView.setText(string);
+                    }
+                });
+            }
+        });
+    }
+
+
+
+    /*
+    处理返回信息，查看有无更新数据，有更新则通知adapter刷新；无则返回，不用刷新。
+     */
+    public void handleInfo(LatestNews latestNews){
+        //先清空
+        storyList.clear();
+        bannerImages.clear();
+        imageTitles.clear();
+
+        for (Story story : latestNews.stories)
+            storyList.add(story);
+        for (TopStory topStory : latestNews.topStories){
+            bannerImages.add(topStory.image);
+            imageTitles.add(topStory.title);
+        }
+        startBanner();
+        myAdapter.notifyDataSetChanged();
+
+
+    }
+
+    public void handleInfo(ThemeNewsContent themeNewsContent){
+        storyList.clear();
+        for (ThemeNewsStory themeNewsStory : themeNewsContent.stories)
+            storyList.add(new Story(themeNewsStory.title, themeNewsStory.images, themeNewsStory.id));
+        bannerImages.clear();
+        imageTitles.clear();
+        bannerImages.add(themeNewsContent.background);
+        imageTitles.add(themeNewsContent.description);
+        startBanner();
+        myAdapter.notifyDataSetChanged();
+//        swipeRefreshLayout.setRefreshing(false);
+////        closeProgressDialog();
 
     }
 
     /*
-    向服务器端请求
-     */
-    private void requestFromServer(){
+   请求具体新闻内容
+    */
+    public void requestNewsContentFromServer(String address){
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final NewsContent newsContent =  new Gson().fromJson(response.body().string(),
+                        NewsContent.class);
+                final boolean or = (response.isSuccessful());
+//                final String string = response.body().string();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (newsContent != null)
+                            handleInfo(newsContent);
+                        else
+                            Toast.makeText(getActivity(), "请求失败=_=" + or, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+    }
+
+    //将新闻内容解析成html，使用WebView加载
+    public void handleInfo(NewsContent newsContent){
+        String css ="<link rel=\"stylesheet\" href=\"" + newsContent.css.get(0) + "\" " +
+                "type=\"text/css\">";
+        String html = "<html><head>" + css + "</head><body>" + newsContent.body + "</body></html>";
+        html = html.replace("<div class=\"img-place-holder\">", "");
+//        mWebViewFragment = new WebViewFragment();//不能在Fragment中实例化，而应该放到Activity中实例化
+
+        ((MainActivity) getActivity()).setmWebViewContent(html);
+        mSwitchFragmentListener.switchFragment();
 
     }
+
+//    public interface SwitchFragmentListener{
+//        void switchFragment();
+//    }
+
+    public void setmSwitchFragmentListener(SwitchFragmentListener listener){
+        mSwitchFragmentListener = listener;
+    }
+
+//
 
     /*
     显示进度对话框
@@ -196,4 +448,50 @@ public class RecyclerViewFragment extends Fragment {
             mProgressDialog.dismiss();
         }
     }
+
+    //    private Handler handler = new Handler(){
+//
+//        @Override
+//        public void handleMessage(Message msg) {
+//            closeProgressDialog();
+//            parseJson((String) msg.obj);
+//        }
+//    };
+//    public void showResponse(final String response){
+//        getActivity().runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                closeProgressDialog();
+////                parseJson(response);
+//                handleInfo(new Gson().fromJson(response, LatestNews.class));
+//            }
+//        });
+//    }
+//
+//
+//
+//
+//
+//    /*
+//    向服务器端请求
+//     */
+//    private void requestFromServer(){
+//        new Thread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                try {
+//                    OkHttpClient okHttpClient = new OkHttpClient();
+//                    Request request = new Request.Builder().url(Urls.LATEST_NEWS).build();
+//                    String res = okHttpClient.newCall(request).execute().body().string();
+//                    showResponse(res);
+////                    Message message = new Message();
+////                    message.obj = res;
+////                    handler.sendMessage(message);
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+//    }
 }

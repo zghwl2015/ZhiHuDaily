@@ -30,6 +30,17 @@ public class NewsListAdapter extends RecyclerView.Adapter {
     private View mHeaderView;
     private View mTitleView;
     private Context mContext;
+    private RecyclerViewOnClickListener mRecyclerViewOnClickListener;
+
+    //新建recyclerview子项点击事件接口,用来调用父Fragment方法
+    public interface RecyclerViewOnClickListener{
+        void onClick(int id);
+        int getThemeId(String title);
+    }
+
+    public void setRecyclerViewOnClickListener(RecyclerViewOnClickListener listener){
+        mRecyclerViewOnClickListener = listener;
+    }
 
     public void setmHeaderView(View headerView){
         if (headerView != null){
@@ -99,6 +110,7 @@ public class NewsListAdapter extends RecyclerView.Adapter {
             return new TitleViewHolder(mTitleView);
         }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_item, parent, false);
+
         return new ViewHolder(view);
     }
 
@@ -124,6 +136,21 @@ public class NewsListAdapter extends RecyclerView.Adapter {
 //        final Story story = mStoryList.get(position - 2);
 
         if (holder != null && holder instanceof ViewHolder){
+            //注册子项点击事件
+            final int themeId = story.id;
+            ((ViewHolder) holder).textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRecyclerViewOnClickListener.onClick(themeId);
+                }
+            });
+
+            ((ViewHolder) holder).imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRecyclerViewOnClickListener.onClick(themeId);
+                }
+            });
 
             try {
                 ((ViewHolder) holder).textView.setText(story.title);

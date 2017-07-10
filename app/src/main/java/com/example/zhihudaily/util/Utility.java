@@ -2,6 +2,7 @@ package com.example.zhihudaily.util;
 
 import com.example.zhihudaily.json.LatestNews;
 import com.example.zhihudaily.json.LaunchImage;
+import com.example.zhihudaily.json.ThemeNewsContent;
 import com.google.gson.Gson;
 
 /**
@@ -10,10 +11,11 @@ import com.google.gson.Gson;
 
 public class Utility {
 
+
     /*
     将返回的json数据解析为LaunchImage实体类
      */
-    public LaunchImage handleLaunchImageResponse(String response){
+    public static LaunchImage handleLaunchImageResponse(String response){
         try {
             return new Gson().fromJson(response, LaunchImage.class);
         } catch (Exception e){
@@ -22,9 +24,20 @@ public class Utility {
         return null;
     }
 
-    public LatestNews handleLatestNewsResponse(String response){
+    public static LatestNews handleLatestNewsResponse(String response){
+
         try {
             return new Gson().fromJson(response, LatestNews.class);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static ThemeNewsContent handleThemeNewsResponse(String response){
+        try {
+            return new Gson().fromJson(response, ThemeNewsContent.class);
         } catch (Exception e){
             e.printStackTrace();
         }

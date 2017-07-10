@@ -9,6 +9,7 @@ import java.util.List;
  */
 
 public class LatestNews {
+    public String LATEST_NEWS = "http://news-at.zhihu.com/api/4/news/latest";
 
     public String date;
 
