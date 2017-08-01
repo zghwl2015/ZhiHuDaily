@@ -7,4 +7,6 @@ package com.example.zhihudaily;
 public interface SwitchFragmentListener {
 
     void switchFragment();
+
+    void switchFragment(int newsId);
 }

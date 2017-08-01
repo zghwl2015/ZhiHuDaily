@@ -123,10 +123,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewFragment = new RecyclerViewFragment();
         transaction.replace(R.id.fl_layout, recyclerViewFragment);
         transaction.commit();
-        recyclerViewFragment.requestLatestNewsFromServer(Urls.LATEST_NEWS);
+//        recyclerViewFragment.requestLatestNewsFromServer(Urls.LATEST_NEWS);
+//        recyclerViewFragment.addScrollListener();
         recyclerViewFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
             @Override
             public void switchFragment() {
+
+            }
+
+            @Override
+            public void switchFragment(final int newsId) {
 //                if (mWebViewFragment.)
 //                WebViewFragment  mWebViewFragment = new WebViewFragment();
 
@@ -139,10 +145,12 @@ public class MainActivity extends AppCompatActivity {
 
                 fragmentManager.executePendingTransactions();
                 mWebViewFragment.setContent(mWebViewContent);
+                mWebViewFragment.setCurrentNewId(newsId);
                 mWebViewFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
                     @Override
                     public void switchFragment() {
                         NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
+                        newsCommentsFragment.setNewsId(newsId);
                         FragmentTransaction transaction = fragmentManager.beginTransaction();
                         if (newsCommentsFragment.isAdded()){
                             transaction.hide(mWebViewFragment).show(newsCommentsFragment).
@@ -153,7 +161,17 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         fragmentManager.executePendingTransactions();
+                        newsCommentsFragment.init();
+//                        newsCommentsFragment.requestNewsConmentsFromServer(Urls.NEWS_COMMENTS + newsId
+//                        + Urls.SHORT_COMMENTS);
                     }
+
+                    @Override
+                    public void switchFragment(int newsId) {
+
+                    }
+
+
                 });
             }
         });
@@ -178,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         myMenuList.add(new MyMenu("开始游戏", R.drawable.menu_follow));
         myMenuList.add(new MyMenu("音乐日报", R.drawable.menu_follow));
         myMenuList.add(new MyMenu("动漫日报", R.drawable.menu_follow));
-        myMenuList.add(new MyMenu("体育安全", R.drawable.menu_follow));
+        myMenuList.add(new MyMenu("体育日报", R.drawable.menu_follow));
         return myMenuList;
 
     }

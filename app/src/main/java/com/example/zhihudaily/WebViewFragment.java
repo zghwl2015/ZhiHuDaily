@@ -18,6 +18,12 @@ public class WebViewFragment extends Fragment {
     private WebView mWebView;
     private FloatingActionButton mFloatingActionButton;
     private SwitchFragmentListener mSwitchFragmentListener;
+
+    public void setCurrentNewId(int currentNewId) {
+        this.currentNewId = currentNewId;
+    }
+
+    private int currentNewId;
 //    private String mWebContent;
 //
 //    public WebViewFragment(){
@@ -36,6 +42,8 @@ public class WebViewFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mSwitchFragmentListener.switchFragment();
+//                Intent intent = new Intent(getActivity(), TestActivity.class);
+//                startActivity(intent);
             }
         });
         return view;

@@ -1,128 +1,127 @@
 package com.example.zhihudaily;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
-import android.webkit.WebView;
-import android.widget.Toast;
+import android.view.View;
 
-import com.example.zhihudaily.json.NewsContent;
-import com.example.zhihudaily.json.Story;
-import com.example.zhihudaily.util.HttpUtil;
-import com.example.zhihudaily.util.Urls;
-import com.google.gson.Gson;
-import com.youth.banner.Banner;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by hwl on 2017/7/5.
  */
 
-public class TestActivity extends AppCompatActivity {
+public class TestActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener{
 
-    private RecyclerView mRecyclerView;
-    private ProgressDialog mProgressDialog;//进度对话框
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private Banner mBanner;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
 
-    private List<String> bannerImages = new ArrayList<>();//banner轮播图片
-    private List<String> imageTitles = new ArrayList<>();//轮播图片标题
-    private List<Story> storyList = new ArrayList<>();//recyclerview新闻子项内容
+    public void setNewsId(int newsId) {
+        this.newsId = newsId;
+    }
 
-    private WebView mWebView;
+    private int newsId;
+
+    private List<String> mTitles = new ArrayList<>();
+    private List<Fragment> mFragments = new ArrayList<>();
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.webview_fragment);
-        mWebView = (WebView) findViewById(R.id.web_view);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        Intent intent=getIntent();
-        Bundle bundle=intent.getExtras();
-        int id = bundle.getInt("themeId");
-        requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id);
+        setContentView(R.layout.news_comments);
+
+
+        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+        init();
 
     }
 
-    /*
-  请求具体新闻内容
-   */
-    public void requestNewsContentFromServer(String address){
-        HttpUtil.sendOkHttpRequest(address, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(TestActivity.this, "请求失败=_=", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+    public void init(){
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final NewsContent newsContent =  new Gson().fromJson(response.body().string(),
-                        NewsContent.class);
-                final boolean or = (response.isSuccessful());
-//                final String string = response.body().string();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (newsContent != null)
-                            handleInfo(newsContent);
-                        else
-                            Toast.makeText(TestActivity.this, "请求失败=_=" + or, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-    }
+        mTitles.add("长评论");
+        mTitles.add("短评论");
 
-    //将新闻内容解析成html，使用WebView加载
-    public void handleInfo(NewsContent newsContent){
-        String css ="<link rel=\"stylesheet\" href=\"" + newsContent.css.get(0) + "\" " +
-                "type=\"text/css\">";
-        String html = "<html><head>" + css + "</head><body>" + newsContent.body + "</body></html>";
-        html = html.replace("<div class=\"img-place-holder\">", "");
-        mWebView.loadDataWithBaseURL("x-data://base", html, "text/html",
-                "UTF-8", null);
+        CommentsFragment longComments = new CommentsFragment();
+        CommentsFragment shortComments = new CommentsFragment();
+
+
+
+        mFragments.add(new CommentsFragment());
+        mFragments.add(new CommentsFragment());
+
+        //在fragment中给viewpager设置adapter需要使用getChildFragmentManager()
+        mViewPager.setAdapter(new MyAdapter1(getSupportFragmentManager(), mTitles, mFragments));
+        mTabLayout.setupWithViewPager(mViewPager);
+        mTabLayout.addOnTabSelectedListener(this);
+
+//        longComments.setNewId(newsId);
+//        shortComments.setNewId(newsId);
+//        if (newsId != 0){
+//            longComments.requestNewsConmentsFromServer(Urls.NEWS_COMMENTS + newsId + Urls.LONG_COMMENTS);
+//            shortComments.requestNewsConmentsFromServer(Urls.NEWS_COMMENTS + newsId + Urls.SHORT_COMMENTS);
+//        }
 
     }
 
 
-    /*
-    请求最新消息
-     */
-    private void requestLatestNews(){
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+
+        mViewPager.setCurrentItem(tab.getPosition());
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
 
     }
 
-
-    /*
-    请求具体消息内容
-     */
-    private void requestNewsContent(){
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
 
     }
 
-    /*
-    向服务器端请求
-     */
-    private void requestFromServer(){
-
-    }
 
 
 
 }
+
+class MyAdapter1 extends FragmentPagerAdapter {
+    private List<String> mTitles ;
+    private List<Fragment> mFragments ;
+
+    public MyAdapter1(FragmentManager fm, List<String> titles, List<Fragment> fragments){
+        super(fm);
+        mTitles = titles;
+        mFragments = fragments;
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        return mFragments.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return mFragments.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View view, Object object) {
+        return super.isViewFromObject(view, object);
+    }
+
+    //配置标题
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return mTitles.get(position);
+    }
+
+}
+

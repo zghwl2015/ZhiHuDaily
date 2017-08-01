@@ -6,8 +6,8 @@ import java.util.List;
  * Created by hwl on 2017/3/13.
  */
 
-public class LongCommentsDetail {
+public class CommentsDetail {
 
-    public List<LongCommentDetail> comments;
+    public List<ShortCommentDetail> comments;
 
 }

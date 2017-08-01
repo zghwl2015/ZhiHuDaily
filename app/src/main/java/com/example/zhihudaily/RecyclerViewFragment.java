@@ -19,12 +19,14 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.zhihudaily.adapter.GlideImageLoader;
 import com.example.zhihudaily.adapter.NewsListAdapter;
+import com.example.zhihudaily.json.BeforeNews;
 import com.example.zhihudaily.json.LatestNews;
 import com.example.zhihudaily.json.NewsContent;
 import com.example.zhihudaily.json.Story;
 import com.example.zhihudaily.json.ThemeNewsContent;
 import com.example.zhihudaily.json.ThemeNewsStory;
 import com.example.zhihudaily.json.TopStory;
+import com.example.zhihudaily.util.Yesterday;
 import com.example.zhihudaily.util.HttpUtil;
 import com.example.zhihudaily.util.Urls;
 import com.google.gson.Gson;
@@ -73,6 +75,8 @@ public class RecyclerViewFragment extends Fragment {
     private WebViewFragment mWebViewFragment;
 
 
+//    //下面的变量与上拉自动加载有关
+    private String currentDate = new String();
 
     @Nullable
     @Override
@@ -86,7 +90,7 @@ public class RecyclerViewFragment extends Fragment {
         //已在XML文件中设置Banner高度
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(),
-                LinearLayoutManager.VERTICAL, false));
+                LinearLayoutManager.VERTICAL, false));//一定在设置适配器之前添加
         myAdapter = new NewsListAdapter(storyList, getActivity());
         setmHeaderViewAndTitleView(mRecyclerView);
 //        myAdapter.setmHeaderView(null);
@@ -96,18 +100,59 @@ public class RecyclerViewFragment extends Fragment {
 //                inflate(R.layout.recyclerview_title, null);
 //        myAdapter.setmTitleView(titleView);
         mRecyclerView.setAdapter(myAdapter);
-        //启动mBanner
-//        initDataAndImages();
-//        requestFromServer();
-
-//        requestLatestNewsFromServer(Urls.LATEST_NEWS);
-//        requestThemeNewsFromServer(Urls.THEME_NEWS + 11);
+        requestLatestNewsFromServer(Urls.LATEST_NEWS);
+//        addScrollListener();
+//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//
+//            }
+//
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                int lastItemPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+//                        .findLastVisibleItemPosition();
+//                if (lastItemPosition == ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+//                        .getItemCount() - 1){
+//                    loadMoreNews();
+//                }
+//            }
+//        });
 
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         return view;
     }
 
+    void addScrollListener(){
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int lastItemPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                        .findLastVisibleItemPosition();
+                if (lastItemPosition == ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                        .getItemCount() - 1){
+                    loadMoreNews();
+                }
+            }
+        });
+    }
+
+    /*
+    用于上拉加载更多
+     */
+    public void loadMoreNews(){
+        if (Yesterday.findYesterday(currentDate) != ""){
+            requestBeforeNewsFromServer(Urls.BEFOREE_NEWS + Yesterday.findYesterday(currentDate));
+            currentDate = Yesterday.findYesterday(currentDate);
+        }
+
+    }
     /*
     完成一些与父活动相关的初始化操作
      */
@@ -137,7 +182,7 @@ public class RecyclerViewFragment extends Fragment {
         myAdapter.setRecyclerViewOnClickListener(new NewsListAdapter.RecyclerViewOnClickListener() {
             @Override
             public void onClick(int id) {
-                requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id);
+                requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id, id);
 //                Intent intent = new Intent(getActivity(), TestActivity.class);
 //                intent.putExtra("themeId", id);
 //                getActivity().startActivity(intent);
@@ -259,6 +304,7 @@ public class RecyclerViewFragment extends Fragment {
 
     }
 
+
     /*
     向远程服务端请求内容
      */
@@ -295,6 +341,44 @@ public class RecyclerViewFragment extends Fragment {
             }
         });
     }
+
+    /*
+    向远程服务端请求历史内容
+     */
+    public void requestBeforeNewsFromServer(String address){
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final BeforeNews beforeNews =  new Gson().fromJson(response.body().string(), BeforeNews.class);;
+//                final String string = response.body().toString();
+
+//                final ThemeNewsContent themeNewsContent = Utility.handleThemeNewsResponse(response.body().toString());
+//                final boolean or = (response.isSuccessful());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (beforeNews != null)
+                            handleInfo(beforeNews);
+                        else
+                            Toast.makeText(getActivity(), "请求失败=_=", Toast.LENGTH_SHORT).show();
+//                        parseJson(string);
+                    }
+                });
+            }
+        });
+    }
+
 
     /*
     请求具体消息内容
@@ -344,6 +428,9 @@ public class RecyclerViewFragment extends Fragment {
         bannerImages.clear();
         imageTitles.clear();
 
+        currentDate = latestNews.date;
+
+        addScrollListener();
         for (Story story : latestNews.stories)
             storyList.add(story);
         for (TopStory topStory : latestNews.topStories){
@@ -351,6 +438,19 @@ public class RecyclerViewFragment extends Fragment {
             imageTitles.add(topStory.title);
         }
         startBanner();
+        myAdapter.notifyDataSetChanged();
+
+    }
+
+    public void handleInfo(BeforeNews beforeNews){
+
+        for (Story story : beforeNews.stories)
+            storyList.add(story);
+//        for (TopStory topStory : latestNews.topStories){
+//            bannerImages.add(topStory.image);
+//            imageTitles.add(topStory.title);
+//        }
+//        startBanner();
         myAdapter.notifyDataSetChanged();
 
 
@@ -374,7 +474,7 @@ public class RecyclerViewFragment extends Fragment {
     /*
    请求具体新闻内容
     */
-    public void requestNewsContentFromServer(String address){
+    public void requestNewsContentFromServer(String address, final int newId){
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -397,7 +497,7 @@ public class RecyclerViewFragment extends Fragment {
                     @Override
                     public void run() {
                         if (newsContent != null)
-                            handleInfo(newsContent);
+                            handleInfo(newsContent, newId);
                         else
                             Toast.makeText(getActivity(), "请求失败=_=" + or, Toast.LENGTH_SHORT).show();
                     }
@@ -407,7 +507,7 @@ public class RecyclerViewFragment extends Fragment {
     }
 
     //将新闻内容解析成html，使用WebView加载
-    public void handleInfo(NewsContent newsContent){
+    public void handleInfo(NewsContent newsContent, int newId){
         String css ="<link rel=\"stylesheet\" href=\"" + newsContent.css.get(0) + "\" " +
                 "type=\"text/css\">";
         String html = "<html><head>" + css + "</head><body>" + newsContent.body + "</body></html>";
@@ -415,7 +515,7 @@ public class RecyclerViewFragment extends Fragment {
 //        mWebViewFragment = new WebViewFragment();//不能在Fragment中实例化，而应该放到Activity中实例化
 
         ((MainActivity) getActivity()).setmWebViewContent(html);
-        mSwitchFragmentListener.switchFragment();
+        mSwitchFragmentListener.switchFragment(newId);
 
     }
 

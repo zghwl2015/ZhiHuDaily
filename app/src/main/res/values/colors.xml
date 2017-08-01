@@ -10,4 +10,5 @@
     <color name="whiteSmoke">#F5F5F5</color>
     <color name="ivoryDark">#292421</color>
     <color name="peacockBlue">#33A1C9</color>
+    <color name="black">#000000</color> <!--黑色 -->
 </resources>
