@@ -9,7 +9,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +25,14 @@ import com.example.zhihudaily.json.Story;
 import com.example.zhihudaily.json.ThemeNewsContent;
 import com.example.zhihudaily.json.ThemeNewsStory;
 import com.example.zhihudaily.json.TopStory;
-import com.example.zhihudaily.util.Yesterday;
 import com.example.zhihudaily.util.HttpUtil;
 import com.example.zhihudaily.util.Urls;
+import com.example.zhihudaily.util.Yesterday;
 import com.google.gson.Gson;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
+import com.youth.banner.listener.OnBannerListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class RecyclerViewFragment extends Fragment {
     private Banner mBanner;
 
 //    private TextView textView;
-
+    private List<Integer> newsIdList = new ArrayList<>();//banner轮播新闻内容ID集合
     private List<String> bannerImages = new ArrayList<>();;//banner轮播图片
     private List<String> imageTitles = new ArrayList<>();;//轮播图片标题
     private List<Story> storyList = new ArrayList<>();//recyclerview新闻子项内容
@@ -73,6 +73,8 @@ public class RecyclerViewFragment extends Fragment {
 
     private SwitchFragmentListener mSwitchFragmentListener;
     private WebViewFragment mWebViewFragment;
+
+    private int previousItemNum = 0;//与Adapter中的isClicks链表有关，用于点击改变recyclerview子项文本颜色
 
 
 //    //下面的变量与上拉自动加载有关
@@ -91,16 +93,17 @@ public class RecyclerViewFragment extends Fragment {
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.VERTICAL, false));//一定在设置适配器之前添加
-        myAdapter = new NewsListAdapter(storyList, getActivity());
-        setmHeaderViewAndTitleView(mRecyclerView);
+
+
 //        myAdapter.setmHeaderView(null);
 
 
 //        View titleView = LayoutInflater.from(getActivity()).
 //                inflate(R.layout.recyclerview_title, null);
 //        myAdapter.setmTitleView(titleView);
-        mRecyclerView.setAdapter(myAdapter);
+
         requestLatestNewsFromServer(Urls.LATEST_NEWS);
+        initRecyclerView();
 //        addScrollListener();
 //        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
@@ -122,6 +125,12 @@ public class RecyclerViewFragment extends Fragment {
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         return view;
+    }
+
+    void initRecyclerView(){
+        myAdapter = new NewsListAdapter(storyList, getActivity());
+        setmHeaderViewAndTitleView(mRecyclerView);
+        mRecyclerView.setAdapter(myAdapter);
     }
 
     void addScrollListener(){
@@ -224,10 +233,12 @@ public class RecyclerViewFragment extends Fragment {
                 .setBannerTitles(imageTitles)
                 .setBannerAnimation(Transformer.DepthPage)
                 .isAutoPlay(true)
-                .setOnClickListener(new View.OnClickListener() {
+                .setOnBannerListener(new OnBannerListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void OnBannerClick(int position) {
 
+                        requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + newsIdList.get(position),
+                                newsIdList.get(position));
                     }
                 });
         mBanner.start();
@@ -273,22 +284,23 @@ public class RecyclerViewFragment extends Fragment {
 
     }
 
-    public void parseJson(String res){
-        Log.d("LatestNews","res: " + res);
-        LatestNews latestNews = new Gson().fromJson(res, LatestNews.class);
-        Log.d("LatestNews","story title is : " + latestNews.stories.get(0).title);
-        Log.d("LatestNews","story image url is : " + latestNews.stories.get(0).images.get(0));
-        for (Story story : latestNews.stories)
-            storyList.add(story);
-        for (TopStory topStory : latestNews.topStories){
-            bannerImages.add(topStory.image);
-            imageTitles.add(topStory.title);
-        }
-        startBanner();
-        myAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-
-    }
+//    public void parseJson(String res){
+//        Log.d("LatestNews","res: " + res);
+//        LatestNews latestNews = new Gson().fromJson(res, LatestNews.class);
+//        Log.d("LatestNews","story title is : " + latestNews.stories.get(0).title);
+//        Log.d("LatestNews","story image url is : " + latestNews.stories.get(0).images.get(0));
+//        for (Story story : latestNews.stories)
+//            storyList.add(story);
+//        for (TopStory topStory : latestNews.topStories){
+//            bannerImages.add(topStory.image);
+//            imageTitles.add(topStory.title);
+//            newsIdList.add(topStory.id);
+//        }
+//        startBanner();
+//        myAdapter.notifyDataSetChanged();
+//        swipeRefreshLayout.setRefreshing(false);
+//
+//    }
 
     /*
     请求最新消息，先查看本地数据库有无缓存，有则直接从本地获取；无则向服务器请求
@@ -436,10 +448,19 @@ public class RecyclerViewFragment extends Fragment {
         for (TopStory topStory : latestNews.topStories){
             bannerImages.add(topStory.image);
             imageTitles.add(topStory.title);
+            newsIdList.add(topStory.id);
         }
+        extendIsclicks(previousItemNum, storyList.size());
+        previousItemNum = storyList.size();
         startBanner();
         myAdapter.notifyDataSetChanged();
 
+    }
+
+    void extendIsclicks(int preLen, int currLen){
+        for (int i =preLen; i < currLen; i++){
+            myAdapter.isClicks.add(false);
+        }
     }
 
     public void handleInfo(BeforeNews beforeNews){
@@ -451,12 +472,15 @@ public class RecyclerViewFragment extends Fragment {
 //            imageTitles.add(topStory.title);
 //        }
 //        startBanner();
+        extendIsclicks(previousItemNum, storyList.size());
+        previousItemNum = storyList.size();
         myAdapter.notifyDataSetChanged();
 
 
     }
 
     public void handleInfo(ThemeNewsContent themeNewsContent){
+
         storyList.clear();
         for (ThemeNewsStory themeNewsStory : themeNewsContent.stories)
             storyList.add(new Story(themeNewsStory.title, themeNewsStory.images, themeNewsStory.id));
@@ -464,6 +488,9 @@ public class RecyclerViewFragment extends Fragment {
         imageTitles.clear();
         bannerImages.add(themeNewsContent.background);
         imageTitles.add(themeNewsContent.description);
+        //更新isClicks
+        myAdapter.isClicks.clear();
+        extendIsclicks(0, storyList.size());
         startBanner();
         myAdapter.notifyDataSetChanged();
 //        swipeRefreshLayout.setRefreshing(false);

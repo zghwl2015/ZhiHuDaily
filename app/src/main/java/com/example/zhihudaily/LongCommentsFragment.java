@@ -29,7 +29,7 @@ import okhttp3.Response;
  * 评论界面中，作为ViewPager的子项，用于展示短评论和长评论
  */
 
-public class CommentsFragment extends Fragment {
+public class LongCommentsFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private CommentItemAdapter commentItemAdapter;
 
@@ -59,7 +59,7 @@ public class CommentsFragment extends Fragment {
     /*
   请求具体新闻内容
    */
-    public void requestNewsConmentsFromServer(String address){
+    public void requestNewsCommentsFromServer(String address){
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -109,7 +109,7 @@ public class CommentsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         newsId = ((NewsCommentsFragment) this.getParentFragment()).getNewsId();
-        requestNewsConmentsFromServer(Urls.NEWS_COMMENTS + newsId + Urls.LONG_COMMENTS);
+        requestNewsCommentsFromServer(Urls.NEWS_COMMENTS + newsId + Urls.LONG_COMMENTS);
     }
 
 }

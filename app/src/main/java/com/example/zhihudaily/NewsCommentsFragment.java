@@ -44,21 +44,24 @@ public class NewsCommentsFragment extends Fragment implements TabLayout.OnTabSel
         View view = inflater.inflate(R.layout.news_comments, container, false);
         mTabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
         mViewPager = (ViewPager) view.findViewById(R.id.view_pager);
+        mTitles.add("长评论");
+        mTitles.add("短评论");
+
+        LongCommentsFragment longComments = new LongCommentsFragment();
+        LongCommentsFragment shortComments = new LongCommentsFragment();
+
+
+
+        mFragments.add(new LongCommentsFragment());
+        mFragments.add(new ShortCommentFragment());
         return view;
     }
 
     public void init(){
 
-        mTitles.add("长评论");
-        mTitles.add("短评论");
-
-        CommentsFragment longComments = new CommentsFragment();
-        CommentsFragment shortComments = new CommentsFragment();
 
 
 
-        mFragments.add(new CommentsFragment());
-        mFragments.add(new CommentsFragment());
 
         //在fragment中给viewpager设置adapter需要使用getChildFragmentManager()
         mViewPager.setAdapter(new MyAdapter(getChildFragmentManager(), mTitles, mFragments));

@@ -47,13 +47,13 @@ public class TestActivity extends AppCompatActivity implements TabLayout.OnTabSe
         mTitles.add("长评论");
         mTitles.add("短评论");
 
-        CommentsFragment longComments = new CommentsFragment();
-        CommentsFragment shortComments = new CommentsFragment();
+        LongCommentsFragment longComments = new LongCommentsFragment();
+        LongCommentsFragment shortComments = new LongCommentsFragment();
 
 
 
-        mFragments.add(new CommentsFragment());
-        mFragments.add(new CommentsFragment());
+        mFragments.add(new LongCommentsFragment());
+        mFragments.add(new LongCommentsFragment());
 
         //在fragment中给viewpager设置adapter需要使用getChildFragmentManager()
         mViewPager.setAdapter(new MyAdapter1(getSupportFragmentManager(), mTitles, mFragments));

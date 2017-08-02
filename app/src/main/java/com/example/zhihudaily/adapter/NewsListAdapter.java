@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.zhihudaily.R;
 import com.example.zhihudaily.json.Story;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,6 +32,8 @@ public class NewsListAdapter extends RecyclerView.Adapter {
     private View mTitleView;
     private Context mContext;
     private RecyclerViewOnClickListener mRecyclerViewOnClickListener;
+
+    public List<Boolean> isClicks;//用于存储子项是否被点击
 
     //新建recyclerview子项点击事件接口,用来调用父Fragment方法
     public interface RecyclerViewOnClickListener{
@@ -58,6 +61,7 @@ public class NewsListAdapter extends RecyclerView.Adapter {
 
         TextView textView;
         ImageView imageView;
+        boolean isClicked = false;
 //        Button button;
 
         public ViewHolder(View view){
@@ -93,6 +97,10 @@ public class NewsListAdapter extends RecyclerView.Adapter {
     public NewsListAdapter(List<Story> storyList, Context context){
         mStoryList = storyList;
         mContext = context;
+        isClicks = new ArrayList<>();
+        for (int i = 0; i < mStoryList.size(); i++){
+            isClicks.add(false);
+        }
     }
 
 //    //初始化新闻数据
@@ -134,14 +142,24 @@ public class NewsListAdapter extends RecyclerView.Adapter {
         final int pos = getRealPosition(holder);
         final Story story = mStoryList.get(pos);
 //        final Story story = mStoryList.get(position - 2);
+        TextView title =((ViewHolder) holder).textView;
+        if (isClicks.get(pos)){
+            title.setTextColor(mContext.getResources().getColor(R.color.gray));
+        }else {
+            title.setTextColor(mContext.getResources().getColor(R.color.black));
+        }
 
         if (holder != null && holder instanceof ViewHolder){
             //注册子项点击事件
             final int themeId = story.id;
+//            final boolean isClicked = ((ViewHolder) holder).isClicked;
             ((ViewHolder) holder).textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mRecyclerViewOnClickListener.onClick(themeId);
+                    isClicks.set(pos, true);
+                    notifyDataSetChanged();
+
                 }
             });
 

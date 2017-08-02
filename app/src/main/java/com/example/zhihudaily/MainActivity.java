@@ -1,6 +1,7 @@
 package com.example.zhihudaily;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -8,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,12 +60,25 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isMapInited = false;
 
+    //当前显示的fragment
+    private Fragment mCurrentFragment;
+
+    //TAG
+    private static String TAG_HOME = "home";
+    private static String TAG_CONTENT = "content";
+    private static String TAG_COMMENT = "comment";
+
     public void setmWebViewContent(String mWebViewContent) {
         this.mWebViewContent = mWebViewContent;
     }
 
     WebViewFragment  mWebViewFragment = new WebViewFragment();
+    NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
     private String mWebViewContent;
+
+    public MainActivity() {
+        super();
+    }
 
     //@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,12 +116,18 @@ public class MainActivity extends AppCompatActivity {
 //                transaction.replace(R.id.fl_layout, fragment);//替换frameLayout
 //                transaction.commit();
                 recyclerViewFragment.requestThemeNewsFromServer(Urls.THEME_NEWS + themeId);
+                if (!(mCurrentFragment instanceof RecyclerViewFragment)){
+                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                    ft.hide(mCurrentFragment).show(recyclerViewFragment);
+                    ft.commit();
 
+                }
                 mDrawerLayout.closeDrawers();//关闭滑动菜单
 
             }
         });
 
+        //滑动菜单首页点击事件切换
         mLinearLayout = (LinearLayout) findViewById(R.id.layout_home);
         mLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,14 +136,24 @@ public class MainActivity extends AppCompatActivity {
                     mToolbar.setTitle("首页");
                     recyclerViewFragment.requestLatestNewsFromServer(Urls.LATEST_NEWS);
                 }
+                if (!(mCurrentFragment instanceof RecyclerViewFragment)){
+                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                    ft.hide(mCurrentFragment).show(recyclerViewFragment);
+                    ft.commit();
+
+                }
+//                TextView title =(TextView) mLinearLayout.findViewById(R.id.news_title);
+//                title.setTextColor(getResources().getColor(R.color.gray));
+//                if (title.getCurrentTextColor() == )
                 mDrawerLayout.closeDrawers();//关闭滑动菜单
             }
         });
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
         recyclerViewFragment = new RecyclerViewFragment();
-        transaction.replace(R.id.fl_layout, recyclerViewFragment);
+        transaction.replace(R.id.fl_layout, recyclerViewFragment, TAG_HOME);
         transaction.commit();
+        mCurrentFragment = recyclerViewFragment;//赋值
 //        recyclerViewFragment.requestLatestNewsFromServer(Urls.LATEST_NEWS);
 //        recyclerViewFragment.addScrollListener();
         recyclerViewFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
@@ -140,28 +171,32 @@ public class MainActivity extends AppCompatActivity {
                 if (mWebViewFragment.isAdded()){
                     transaction.hide(recyclerViewFragment).show(mWebViewFragment).commitAllowingStateLoss();
                 }else {
-                    transaction.hide(recyclerViewFragment).add(R.id.fl_layout, mWebViewFragment).commitAllowingStateLoss();
+                    transaction.hide(recyclerViewFragment).add(R.id.fl_layout, mWebViewFragment, TAG_CONTENT)
+                            .commitAllowingStateLoss();
                 }
 
                 fragmentManager.executePendingTransactions();
                 mWebViewFragment.setContent(mWebViewContent);
                 mWebViewFragment.setCurrentNewId(newsId);
+
+                mCurrentFragment = mWebViewFragment;
                 mWebViewFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
                     @Override
                     public void switchFragment() {
-                        NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
+//                        NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
                         newsCommentsFragment.setNewsId(newsId);
                         FragmentTransaction transaction = fragmentManager.beginTransaction();
                         if (newsCommentsFragment.isAdded()){
                             transaction.hide(mWebViewFragment).show(newsCommentsFragment).
                                     commitAllowingStateLoss();
                         }else {
-                            transaction.hide(mWebViewFragment).add(R.id.fl_layout, newsCommentsFragment).
+                            transaction.hide(mWebViewFragment).add(R.id.fl_layout, newsCommentsFragment, TAG_COMMENT).
                                     commitAllowingStateLoss();
                         }
 
                         fragmentManager.executePendingTransactions();
                         newsCommentsFragment.init();
+                        mCurrentFragment = newsCommentsFragment;
 //                        newsCommentsFragment.requestNewsConmentsFromServer(Urls.NEWS_COMMENTS + newsId
 //                        + Urls.SHORT_COMMENTS);
                     }
@@ -176,7 +211,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(Gravity.START)){
+            mDrawerLayout.closeDrawers();
+        }else {
+            if (mCurrentFragment instanceof RecyclerViewFragment){
+                super.onBackPressed();
+            }
+            if (mCurrentFragment instanceof WebViewFragment){
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.show(recyclerViewFragment)
+                        .hide(mCurrentFragment);
+                mCurrentFragment = recyclerViewFragment;
+                ft.commit();
+            }
+            if (mCurrentFragment instanceof NewsCommentsFragment){
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.show(mWebViewFragment)
+                        .hide(mCurrentFragment);
+                mCurrentFragment = mWebViewFragment;
+                ft.commit();
+            }
+
+        }
 
     }
 
