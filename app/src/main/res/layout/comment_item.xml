@@ -5,42 +5,55 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/avatar"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:padding="10dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+
         />
-    
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="25dp">
+            android:layout_height="30dp">
             <TextView
                 android:id="@+id/comment_author"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="18dp"
+                android:layout_height="30dp"
+                android:textSize="15sp"
                 android:textColor="@color/black"
                 android:textStyle="bold"
-                android:layout_alignParentBottom="true"/>
+                android:gravity="center_vertical"
+                android:padding="2dp"
+                />
             <TextView
                 android:id="@+id/likes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:padding="2dp"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:textSize="13sp"
 
                 android:textColor="@color/gray"/>
             <ImageView
                 android:id="@+id/vote"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:padding="2dp"
                 android:background="@drawable/comment_vote"
-                android:layout_alignParentTop="true"
-               android:layout_toLeftOf="@id/likes"
+                android:layout_centerVertical="true"
+
+                android:layout_toLeftOf="@id/likes"
+
                 />
-            
+
 
         </RelativeLayout>
 
@@ -49,14 +62,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/ivoryDark"
-            android:textSize="16sp"
+            android:textSize="14sp"
+            android:paddingRight="10dp"
             android:typeface="sans"
             />
         <TextView
             android:id="@+id/comment_time"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="8sp"
+            android:layout_height="25dp"
+            android:textSize="10sp"
+            android:text="time:"
+            android:gravity="center_horizontal"
             android:textColor="@color/gray"
             />
 

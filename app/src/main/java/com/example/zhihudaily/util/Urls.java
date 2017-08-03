@@ -9,7 +9,7 @@ public class Urls {
 
     public static String LATEST_NEWS = "http://news-at.zhihu.com/api/4/news/latest";
 
-    public static String LAUNCH_PAGE = "http://news-at.zhihu.com/api/4/start-image/1080*1776";
+    public static String LAUNCH_IMAGE = "http://news-at.zhihu.com/api/4/start-image/1080*1776";
 
     //请求具体新闻内容
     public static String NEWS_ADDRESS_HEAD = "http://news-at.zhihu.com/api/4/news/";
@@ -29,5 +29,10 @@ public class Urls {
 
     //请求主题新闻列表
     public static String THEME_LIST = "http://news-at.zhihu.com/api/4/themes";
+
+    //获取必应每日一图
+    public static String BINGIMAGE = "http://guolin.tech/api/bing_pic";
+
+
 
 }

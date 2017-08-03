@@ -1,4 +1,4 @@
-package com.example.zhihudaily;
+package com.example.zhihudaily.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,8 +18,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.zhihudaily.fragment.NewsCommentsFragment;
+import com.example.zhihudaily.R;
+import com.example.zhihudaily.fragment.NewsContentFragment;
+import com.example.zhihudaily.fragment.RecyclerViewFragment;
+import com.example.zhihudaily.fragment.SwitchFragmentListener;
 import com.example.zhihudaily.adapter.MenuAdapter;
 import com.example.zhihudaily.adapter.MyMenu;
+import com.example.zhihudaily.json.NewsContent;
 import com.example.zhihudaily.json.Story;
 import com.example.zhihudaily.json.ThemeContent;
 import com.example.zhihudaily.util.HttpUtil;
@@ -72,9 +78,21 @@ public class MainActivity extends AppCompatActivity {
         this.mWebViewContent = mWebViewContent;
     }
 
-    WebViewFragment  mWebViewFragment = new WebViewFragment();
+    NewsContentFragment mNewsContentFragment = new NewsContentFragment();
     NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
     private String mWebViewContent;
+
+    public void setmNewsImage(String mNewsImage) {
+        this.mNewsImage = mNewsImage;
+    }
+
+    private String mNewsImage;
+
+    public void setmNewsContent(NewsContent mNewsContent) {
+        this.mNewsContent = mNewsContent;
+    }
+
+    private NewsContent mNewsContent;
 
     public MainActivity() {
         super();
@@ -164,33 +182,35 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void switchFragment(final int newsId) {
-//                if (mWebViewFragment.)
-//                WebViewFragment  mWebViewFragment = new WebViewFragment();
 
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                if (mWebViewFragment.isAdded()){
-                    transaction.hide(recyclerViewFragment).show(mWebViewFragment).commitAllowingStateLoss();
+                if (mNewsContentFragment.isAdded()){
+                    transaction.hide(recyclerViewFragment).show(mNewsContentFragment).commitAllowingStateLoss();
                 }else {
-                    transaction.hide(recyclerViewFragment).add(R.id.fl_layout, mWebViewFragment, TAG_CONTENT)
+                    transaction.hide(recyclerViewFragment).add(R.id.fl_layout, mNewsContentFragment, TAG_CONTENT)
                             .commitAllowingStateLoss();
                 }
 
                 fragmentManager.executePendingTransactions();
-                mWebViewFragment.setContent(mWebViewContent);
-                mWebViewFragment.setCurrentNewId(newsId);
 
-                mCurrentFragment = mWebViewFragment;
-                mWebViewFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
+//                mNewsContentFragment.setNewsImage(mNewsImage);
+                mNewsContentFragment.loadNewsContent(mNewsContent);
+                mNewsContentFragment.setContent(mWebViewContent);
+                mNewsContentFragment.setCurrentNewId(newsId);
+
+
+                mCurrentFragment = mNewsContentFragment;
+                mNewsContentFragment.setmSwitchFragmentListener(new SwitchFragmentListener() {
                     @Override
                     public void switchFragment() {
 //                        NewsCommentsFragment newsCommentsFragment = new NewsCommentsFragment();
                         newsCommentsFragment.setNewsId(newsId);
                         FragmentTransaction transaction = fragmentManager.beginTransaction();
                         if (newsCommentsFragment.isAdded()){
-                            transaction.hide(mWebViewFragment).show(newsCommentsFragment).
+                            transaction.hide(mNewsContentFragment).show(newsCommentsFragment).
                                     commitAllowingStateLoss();
                         }else {
-                            transaction.hide(mWebViewFragment).add(R.id.fl_layout, newsCommentsFragment, TAG_COMMENT).
+                            transaction.hide(mNewsContentFragment).add(R.id.fl_layout, newsCommentsFragment, TAG_COMMENT).
                                     commitAllowingStateLoss();
                         }
 
@@ -221,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
             if (mCurrentFragment instanceof RecyclerViewFragment){
                 super.onBackPressed();
             }
-            if (mCurrentFragment instanceof WebViewFragment){
+            if (mCurrentFragment instanceof NewsContentFragment){
                 FragmentTransaction ft = fragmentManager.beginTransaction();
                 ft.show(recyclerViewFragment)
                         .hide(mCurrentFragment);
@@ -230,9 +250,9 @@ public class MainActivity extends AppCompatActivity {
             }
             if (mCurrentFragment instanceof NewsCommentsFragment){
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.show(mWebViewFragment)
+                ft.show(mNewsContentFragment)
                         .hide(mCurrentFragment);
-                mCurrentFragment = mWebViewFragment;
+                mCurrentFragment = mNewsContentFragment;
                 ft.commit();
             }
 

@@ -1,7 +1,6 @@
 package com.example.zhihudaily.adapter;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,12 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.zhihudaily.R;
 import com.example.zhihudaily.json.ShortCommentDetail;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -53,10 +51,10 @@ public class CommentItemAdapter extends RecyclerView.Adapter{
         }
     }
 
-//    public CommentItemAdapter(Context context){
-////        commentsDetailList = commentsDetails;
-//        mContext = context;
-//    }
+    public CommentItemAdapter(Context context){
+//        commentsDetailList = commentsDetails;
+        mContext = context;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -75,14 +73,16 @@ public class CommentItemAdapter extends RecyclerView.Adapter{
         //bind
         if (holder != null && holder instanceof ViewHolder){
             try {
-                ((ViewHolder) holder).avatar.setImageURI(Uri.parse(commentsDetail.avatar));
+                Glide.with(mContext).load(commentsDetail.avatar)
+                        .into(((ViewHolder) holder).avatar);
+//                ((ViewHolder) holder).avatar.setImageURI(Uri.parse(commentsDetail.avatar));
                 ((ViewHolder) holder).content.setText(commentsDetail.content);
                 ((ViewHolder) holder).author.setText(commentsDetail.author);
-                ((ViewHolder) holder).likes.setText(commentsDetail.likes);
+                ((ViewHolder) holder).likes.setText(commentsDetail.likes + "");
                 //转化时间
-                Date date = new Date(Long.valueOf(commentsDetail.time));
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                ((ViewHolder) holder).time.setText(formatter.format(date));
+//                Date date = new Date(Long.valueOf(commentsDetail.time));
+//                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                ((ViewHolder) holder).time.setText(formatter.format(date));
             }catch (Exception e){
                 e.printStackTrace();
 //                Toast.makeText(mContext, "无法下载图片！", Toast.LENGTH_SHORT);

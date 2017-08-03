@@ -1,4 +1,4 @@
-package com.example.zhihudaily;
+package com.example.zhihudaily.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.zhihudaily.R;
 import com.example.zhihudaily.adapter.CommentItemAdapter;
 import com.example.zhihudaily.json.ShortCommentDetail;
 import com.example.zhihudaily.json.ShortCommentsDetail;
@@ -47,7 +48,7 @@ public class LongCommentsFragment extends Fragment {
         mRecyclerView = (RecyclerView) view.findViewById(R.id.comments_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.VERTICAL, false));
-        commentItemAdapter = new CommentItemAdapter();
+        commentItemAdapter = new CommentItemAdapter(getContext());
         mRecyclerView.setAdapter(commentItemAdapter);
         return view;
     }

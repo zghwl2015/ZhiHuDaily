@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Created by hwl on 2017/8/1.
+ * 用于上拉自动加载时获取前一天的年月日字符串，如20170802
  */
 
 public class Yesterday {

@@ -1,4 +1,4 @@
-package com.example.zhihudaily;
+package com.example.zhihudaily.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.zhihudaily.R;
+import com.example.zhihudaily.activity.MainActivity;
 import com.example.zhihudaily.adapter.GlideImageLoader;
 import com.example.zhihudaily.adapter.NewsListAdapter;
 import com.example.zhihudaily.json.BeforeNews;
@@ -72,7 +74,7 @@ public class RecyclerViewFragment extends Fragment {
     private Map<String, Integer> menuIdMap = new HashMap<>();
 
     private SwitchFragmentListener mSwitchFragmentListener;
-    private WebViewFragment mWebViewFragment;
+    private NewsContentFragment mNewsContentFragment;
 
     private int previousItemNum = 0;//与Adapter中的isClicks链表有关，用于点击改变recyclerview子项文本颜色
 
@@ -539,9 +541,10 @@ public class RecyclerViewFragment extends Fragment {
                 "type=\"text/css\">";
         String html = "<html><head>" + css + "</head><body>" + newsContent.body + "</body></html>";
         html = html.replace("<div class=\"img-place-holder\">", "");
-//        mWebViewFragment = new WebViewFragment();//不能在Fragment中实例化，而应该放到Activity中实例化
+//        mNewsContentFragment = new NewsContentFragment();//不能在Fragment中实例化，而应该放到Activity中实例化
 
         ((MainActivity) getActivity()).setmWebViewContent(html);
+        ((MainActivity) getActivity()).setmNewsContent(newsContent);
         mSwitchFragmentListener.switchFragment(newId);
 
     }

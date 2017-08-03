@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/whiteSmoke">
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         app:tabBackground="@color/whiteSmoke"
         app:tabTextColor="@color/peacockBlue"
-        app:tabSelectedTextColor="@android:color/holo_orange_light"
+        app:tabSelectedTextColor="@android:color/black"
 
         />
     
@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@color/white"
 
         />
 </LinearLayout>

@@ -43,7 +43,7 @@
 
         <!--<fragment-->
             <!--android:id="@+id/recyclerview_fragment"-->
-            <!--android:name="com.example.zhihudaily.RecyclerViewFragment"-->
+            <!--android:name="com.example.zhihudaily.fragment.RecyclerViewFragment"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="wrap_content"/>-->
 
