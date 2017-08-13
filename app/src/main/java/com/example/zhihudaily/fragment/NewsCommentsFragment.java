@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.zhihudaily.R;
+import com.example.zhihudaily.activity.MainActivity;
+import com.example.zhihudaily.json.ExtraNewsInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,12 @@ public class NewsCommentsFragment extends Fragment implements TabLayout.OnTabSel
     private List<String> mTitles = new ArrayList<>();
     private List<Fragment> mFragments = new ArrayList<>();
 
+    public void setExtraNewsInfo(ExtraNewsInfo extraNewsInfo) {
+        this.extraNewsInfo = extraNewsInfo;
+    }
+
+    private ExtraNewsInfo extraNewsInfo;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,11 +54,11 @@ public class NewsCommentsFragment extends Fragment implements TabLayout.OnTabSel
         View view = inflater.inflate(R.layout.news_comments, container, false);
         mTabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
         mViewPager = (ViewPager) view.findViewById(R.id.view_pager);
-        mTitles.add("长评论");
-        mTitles.add("短评论");
+        mTitles.add("长评");
+        mTitles.add("短评");
 
-        LongCommentsFragment longComments = new LongCommentsFragment();
-        LongCommentsFragment shortComments = new LongCommentsFragment();
+//        LongCommentsFragment longComments = new LongCommentsFragment();
+//        LongCommentsFragment shortComments = new LongCommentsFragment();
 
 
 
@@ -89,6 +97,16 @@ public class NewsCommentsFragment extends Fragment implements TabLayout.OnTabSel
     public void onTabSelected(TabLayout.Tab tab) {
 
         mViewPager.setCurrentItem(tab.getPosition());
+        //更新ToolBar显示当前长/短评论数
+        if (tab.getPosition() == 0){
+            ((MainActivity)getActivity()).getmToolbar().setTitle(
+                    extraNewsInfo.longComments + "条长评"
+            );
+        }else {
+            ((MainActivity)getActivity()).getmToolbar().setTitle(
+                    extraNewsInfo.shortComments + "条短评"
+            );
+        }
     }
 
     @Override

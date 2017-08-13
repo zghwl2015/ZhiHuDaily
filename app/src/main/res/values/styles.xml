@@ -7,5 +7,38 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    
+    <style name="TabTextStyle">
+        <item name="android:textSize">@dimen/tabtextsize</item>
+    </style>
+
+    <!-- 日间模式 -->
+    <style name="AppTheme.day" parent="AppTheme">
+        <item name="containerBackground">@color/white_dark</item>
+        <item name="toolbarBackground">@color/peacockBlue</item>
+        <item name="titleColor">@color/gray_dark</item>
+        <item name="headerTextColor">@color/white_dark</item>
+        <item name="praiseNumColor">@color/gray</item>
+        <item name="commentUserNameColor">@color/black</item>
+        <item name="commentTimeColor">@color/gray</item>
+        <item name="commentTextColor">@color/white_dark</item>
+        <item name="textColor">@color/gray</item>
+        <item name="selectorBtn">@drawable/navigator_list_item_day</item>
+        <item name="selectorListItem">@drawable/list_item_day</item>
+    </style>
+    <!-- 夜间模式 -->
+    <style name="AppTheme.night" parent="AppTheme">
+        <item name="containerBackground">@color/green_dark</item>
+        <item name="toolbarBackground">@color/green_dark</item>
+        <item name="titleColor">@color/white_dark</item>
+        <item name="headerTextColor">@color/white_dark</item>
+        <item name="praiseNumColor">@color/white_dark</item>
+        <item name="commentUserNameColor">@color/whiteSmoke</item>
+        <item name="commentTimeColor">@color/white_dark</item>
+        <item name="commentTextColor">@color/darkGray</item>
+        <item name="textColor">@color/green_light</item>
+        <item name="selectorBtn">@drawable/navigator_list_item_night</item>
+        <item name="selectorListItem">@drawable/list_item_night</item>
+    </style>
 
 </resources>

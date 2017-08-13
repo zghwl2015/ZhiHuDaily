@@ -17,6 +17,7 @@ public class Urls {
     //请求时添加请求新闻的日期，如20170710
     public static String BEFOREE_NEWS = "http://news.at.zhihu.com/api/4/news/before/";
 
+    //点赞数、评论数等信息
     public static String EXTRA_INFO = "http://news-at.zhihu.com/api/4/story-extra/";
 
     public static String NEWS_COMMENTS = " http://news-at.zhihu.com/api/4/story/";

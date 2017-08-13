@@ -65,7 +65,14 @@ public class RecyclerViewFragment extends Fragment {
     private List<Integer> newsIdList = new ArrayList<>();//banner轮播新闻内容ID集合
     private List<String> bannerImages = new ArrayList<>();;//banner轮播图片
     private List<String> imageTitles = new ArrayList<>();;//轮播图片标题
+
+    public List<Story> getStoryList() {
+        return storyList;
+    }
+
     private List<Story> storyList = new ArrayList<>();//recyclerview新闻子项内容
+
+    public List<Integer> newsIdHomeList = new ArrayList<>();//保存新闻ID链表
 
     public void setMenuIdMap(Map<String, Integer> menuIdMap) {
         this.menuIdMap = menuIdMap;
@@ -81,6 +88,8 @@ public class RecyclerViewFragment extends Fragment {
 
 //    //下面的变量与上拉自动加载有关
     private String currentDate = new String();
+    //标识是否主页
+    public boolean isHome = true;
 
     @Nullable
     @Override
@@ -104,7 +113,7 @@ public class RecyclerViewFragment extends Fragment {
 //                inflate(R.layout.recyclerview_title, null);
 //        myAdapter.setmTitleView(titleView);
 
-        requestLatestNewsFromServer(Urls.LATEST_NEWS);
+//        requestLatestNewsFromServer(Urls.LATEST_NEWS);
         initRecyclerView();
 //        addScrollListener();
 //        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -130,12 +139,15 @@ public class RecyclerViewFragment extends Fragment {
     }
 
     void initRecyclerView(){
-        myAdapter = new NewsListAdapter(storyList, getActivity());
+        myAdapter = new NewsListAdapter(storyList, getActivity(), ((MainActivity)getActivity())
+        .getApp().isNightMode());
         setmHeaderViewAndTitleView(mRecyclerView);
         mRecyclerView.setAdapter(myAdapter);
     }
 
+    //上拉加载更多
     void addScrollListener(){
+        final String title = ((MainActivity)getActivity()).mToolbar.getTitle().toString();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -144,11 +156,13 @@ public class RecyclerViewFragment extends Fragment {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                int lastItemPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
-                        .findLastVisibleItemPosition();
-                if (lastItemPosition == ((LinearLayoutManager) mRecyclerView.getLayoutManager())
-                        .getItemCount() - 1){
-                    loadMoreNews();
+                if (isHome){
+                    int lastItemPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                            .findLastVisibleItemPosition();
+                    if (lastItemPosition == ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                            .getItemCount() - 1){
+                        loadMoreNews();
+                    }
                 }
             }
         });
@@ -170,6 +184,7 @@ public class RecyclerViewFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        requestLatestNewsFromServer(Urls.LATEST_NEWS);
         menuIdMap = ((MainActivity)getActivity()).getMenuIdMap();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -192,11 +207,13 @@ public class RecyclerViewFragment extends Fragment {
         menuIdMap = ((MainActivity) getActivity()).getMenuIdMap();
         myAdapter.setRecyclerViewOnClickListener(new NewsListAdapter.RecyclerViewOnClickListener() {
             @Override
-            public void onClick(int id) {
-                requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id, id);
+            public void onClick(int newsId, int pos) {
+//                requestNewsContentFromServer(Urls.NEWS_ADDRESS_HEAD + id, id);
 //                Intent intent = new Intent(getActivity(), TestActivity.class);
 //                intent.putExtra("themeId", id);
 //                getActivity().startActivity(intent);
+
+                mSwitchFragmentListener.switchFragment(newsId, pos);
             }
 
             @Override
@@ -445,8 +462,13 @@ public class RecyclerViewFragment extends Fragment {
         currentDate = latestNews.date;
 
         addScrollListener();
-        for (Story story : latestNews.stories)
+        for (Story story : latestNews.stories){
             storyList.add(story);
+            newsIdHomeList.add(story.id);
+            ((MainActivity)getActivity()).isCollectedList.add(false);
+            ((MainActivity)getActivity()).isPraisedList.add(false);
+        }
+
         for (TopStory topStory : latestNews.topStories){
             bannerImages.add(topStory.image);
             imageTitles.add(topStory.title);
@@ -459,6 +481,7 @@ public class RecyclerViewFragment extends Fragment {
 
     }
 
+    //和点击新闻颜色变淡操作有关
     void extendIsclicks(int preLen, int currLen){
         for (int i =preLen; i < currLen; i++){
             myAdapter.isClicks.add(false);
@@ -467,8 +490,13 @@ public class RecyclerViewFragment extends Fragment {
 
     public void handleInfo(BeforeNews beforeNews){
 
-        for (Story story : beforeNews.stories)
+        for (Story story : beforeNews.stories){
             storyList.add(story);
+            newsIdHomeList.add(story.id);
+            ((MainActivity)getActivity()).isCollectedList.add(false);
+            ((MainActivity)getActivity()).isPraisedList.add(false);
+        }
+
 //        for (TopStory topStory : latestNews.topStories){
 //            bannerImages.add(topStory.image);
 //            imageTitles.add(topStory.title);

@@ -9,4 +9,5 @@ public interface SwitchFragmentListener {
     void switchFragment();
 
     void switchFragment(int newsId);
+    void switchFragment(int newsId, int startPos);
 }

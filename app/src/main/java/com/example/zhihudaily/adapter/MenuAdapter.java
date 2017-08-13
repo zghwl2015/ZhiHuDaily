@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Created by hwl on 2017/7/3.
+ * 和滑动菜单ListView有关
  */
 
 public class MenuAdapter extends ArrayAdapter<MyMenu> {

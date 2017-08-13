@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--自定义属性，先定义才能在XML文件中使用-->
+<resources>
+    <attr name="containerBackground" format="reference|color"></attr>
+    <attr name="cardBackground" format="reference|color"></attr>
+    <attr name="titleColor" format="reference|color"></attr>
+    <attr name="textColor" format="reference|color"></attr>
+    <attr name="commentTextColor" format="reference|color"></attr>
+    <attr name="selectorBtn" format="reference"></attr>
+    <attr name="selectorListItem" format="reference"></attr>
+    <attr name="headerTextColor" format="reference|color"></attr>
+    <attr name="praiseNumColor" format="reference|color"></attr>
+    <attr name="commentTimeColor" format="reference|color"></attr>
+    <attr name="commentUserNameColor" format="reference|color"></attr>
+    <attr name="toolbarBackground" format="reference|color"></attr>
+</resources>

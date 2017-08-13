@@ -31,13 +31,14 @@ public class NewsListAdapter extends RecyclerView.Adapter {
     private View mHeaderView;
     private View mTitleView;
     private Context mContext;
+    private boolean isNightMode;
     private RecyclerViewOnClickListener mRecyclerViewOnClickListener;
 
     public List<Boolean> isClicks;//用于存储子项是否被点击
 
     //新建recyclerview子项点击事件接口,用来调用父Fragment方法
     public interface RecyclerViewOnClickListener{
-        void onClick(int id);
+        void onClick(int id, int pos);
         int getThemeId(String title);
     }
 
@@ -61,7 +62,7 @@ public class NewsListAdapter extends RecyclerView.Adapter {
 
         TextView textView;
         ImageView imageView;
-        boolean isClicked = false;
+//        boolean isClicked = false;
 //        Button button;
 
         public ViewHolder(View view){
@@ -94,9 +95,10 @@ public class NewsListAdapter extends RecyclerView.Adapter {
     }
 
     //利用构造器加载新闻数据
-    public NewsListAdapter(List<Story> storyList, Context context){
+    public NewsListAdapter(List<Story> storyList, Context context, boolean isNight){
         mStoryList = storyList;
         mContext = context;
+        isNightMode = isNight;
         isClicks = new ArrayList<>();
         for (int i = 0; i < mStoryList.size(); i++){
             isClicks.add(false);
@@ -143,11 +145,20 @@ public class NewsListAdapter extends RecyclerView.Adapter {
         final Story story = mStoryList.get(pos);
 //        final Story story = mStoryList.get(position - 2);
         TextView title =((ViewHolder) holder).textView;
-        if (isClicks.get(pos)){
-            title.setTextColor(mContext.getResources().getColor(R.color.gray));
+        if (!isNightMode){
+            if (isClicks.get(pos)){
+                title.setTextColor(mContext.getResources().getColor(R.color.gray));
+            }else {
+                title.setTextColor(mContext.getResources().getColor(R.color.black));
+            }
         }else {
-            title.setTextColor(mContext.getResources().getColor(R.color.black));
+            if (isClicks.get(pos)){
+                title.setTextColor(mContext.getResources().getColor(R.color.darkGray));
+            }else {
+                title.setTextColor(mContext.getResources().getColor(R.color.white));
+            }
         }
+
 
         if (holder != null && holder instanceof ViewHolder){
             //注册子项点击事件
@@ -156,7 +167,7 @@ public class NewsListAdapter extends RecyclerView.Adapter {
             ((ViewHolder) holder).textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mRecyclerViewOnClickListener.onClick(themeId);
+                    mRecyclerViewOnClickListener.onClick(themeId, pos);
                     isClicks.set(pos, true);
                     notifyDataSetChanged();
 
@@ -166,7 +177,7 @@ public class NewsListAdapter extends RecyclerView.Adapter {
             ((ViewHolder) holder).imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mRecyclerViewOnClickListener.onClick(themeId);
+                    mRecyclerViewOnClickListener.onClick(themeId, pos);
                 }
             });
 
@@ -199,13 +210,39 @@ public class NewsListAdapter extends RecyclerView.Adapter {
 
     private int getRealPosition(RecyclerView.ViewHolder holder) {
         int position = holder.getLayoutPosition();
-        return mHeaderView == null ? position: position - 2;
+        if (mHeaderView == null){
+            if (mTitleView == null){
+                return position;
+            }else {
+                return position - 1;
+            }
+        }else {
+            if (mTitleView == null){
+                return position - 1;
+            }else {
+                return position - 2;
+            }
+        }
+//        return mHeaderView == null ? position: position - 2;
     }
 
     @Override
     //返回item的个数，一般情况下，mTitleView存在即意味着mStoryList不为空
     public int getItemCount() {
-        return mHeaderView == null ? mStoryList.size() + 1 : mStoryList.size() + 2;
+        if (mHeaderView == null){
+            if (mTitleView == null){
+                return mStoryList.size();
+            }else {
+                return mStoryList.size() + 1;
+            }
+        }else {
+            if (mTitleView == null){
+                return mStoryList.size() + 1;
+            }else {
+                return mStoryList.size() + 2;
+            }
+        }
+
 
     }
 }

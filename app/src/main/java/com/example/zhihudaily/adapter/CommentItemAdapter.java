@@ -12,7 +12,9 @@ import com.bumptech.glide.Glide;
 import com.example.zhihudaily.R;
 import com.example.zhihudaily.json.ShortCommentDetail;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -81,8 +83,10 @@ public class CommentItemAdapter extends RecyclerView.Adapter{
                 ((ViewHolder) holder).likes.setText(commentsDetail.likes + "");
                 //转化时间
 //                Date date = new Date(Long.valueOf(commentsDetail.time));
-//                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                ((ViewHolder) holder).time.setText(formatter.format(date));
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String commentTime = formatter
+                        .format(new Date(Long.parseLong(commentsDetail.time + "")*1000));
+                ((ViewHolder) holder).time.setText(commentTime);
             }catch (Exception e){
                 e.printStackTrace();
 //                Toast.makeText(mContext, "无法下载图片！", Toast.LENGTH_SHORT);

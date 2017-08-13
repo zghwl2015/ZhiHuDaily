@@ -8,6 +8,7 @@ import com.youth.banner.loader.ImageLoader;
 
 /**
  * Created by hwl on 2017/7/4.
+ * 自定义图片加载器
  */
 
 public class GlideImageLoader extends ImageLoader {

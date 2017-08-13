@@ -3,20 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:padding="10dp"
-    android:background="@color/peacockBlue">
+    android:background="?attr/toolbarBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:orientation="horizontal"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        >
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/user_portrait"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentLeft="true"
-            android:src = "@drawable/comment_avatar"/>
+            android:src = "@drawable/comment_avatar"
+           />
 
         <TextView
             android:layout_width="wrap_content"
@@ -25,7 +27,7 @@
             android:text="请登录"
             android:gravity="center"
             android:paddingLeft="10dp"
-            android:textColor="#FFF"
+            android:textColor="?attr/headerTextColor"
             android:textSize="16sp"/>
 
     </LinearLayout>
@@ -35,31 +37,50 @@
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        >
+        <LinearLayout
+            android:id="@+id/my_collection"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:src="@drawable/collect"
-            android:layout_weight="1"/>
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:text="我的收藏"
-            android:layout_weight="2"
-            android:textColor="#FFF"/>
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:src="@drawable/collect"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:text="我的收藏"
+                android:layout_weight="2"
+                android:textColor="?attr/headerTextColor"/>
 
-        <ImageView
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/day_night_mode"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            android:src="@drawable/download"
-            android:layout_weight="1"/>
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:text="离线下载"
-            android:layout_weight="2"
-            android:textColor="#FFF"/>
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:src="@drawable/download"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:text="夜间模式"
+                android:layout_weight="2"
+                android:textColor="?attr/headerTextColor"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

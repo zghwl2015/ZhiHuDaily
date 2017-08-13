@@ -1,5 +1,6 @@
 package com.example.zhihudaily.json;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  */
 
 //新闻详情数据
-public class Story {
+public class Story implements Serializable{
 
     public String title;
 
